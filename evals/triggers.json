@@ -1,0 +1,41 @@
+{
+  "skill": "apexlang-ui-patterns",
+  "test_cases": [
+    {
+      "input": "ミニマルな業務画面をAPEXで",
+      "should_trigger": true
+    },
+    {
+      "input": "ダークネオンのダッシュボード",
+      "should_trigger": true
+    },
+    {
+      "input": "RPG風のマップUIを作りたい",
+      "should_trigger": true
+    },
+    {
+      "input": "PL/SQLパッケージの書き方",
+      "should_trigger": false
+    },
+    {
+      "input": "Oracle Databaseのインデックス",
+      "should_trigger": false
+    },
+    {
+      "input": "稟議の承認画面をAPEXで",
+      "should_trigger": true
+    },
+    {
+      "input": "受注台帳の一覧画面をAPEXで",
+      "should_trigger": true
+    },
+    {
+      "input": "APEXで勤務表の画面を作りたい",
+      "should_trigger": true
+    },
+    {
+      "input": "現場の作業員がスマホで使うAPEX画面を作りたい",
+      "should_trigger": true
+    }
+  ]
+}

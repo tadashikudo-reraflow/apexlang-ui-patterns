@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>スマホ現場型 モック（架空の業務）</title>
+<style>
+/* このモックだけで閉じた見本です。外部ファイルは読みません。
+   変数名は見本用（--m-*）で、APEX の変数ではありません。APEX での対応は references/patterns/mobile-field.md を見てください。 */
+:root{
+  --m-bg:#f3f5f7; --m-surface:#ffffff; --m-text:#14181f; --m-muted:#4a5563; --m-line:#d5dbe2;
+  --m-primary:#0b5cad; --m-primary-text:#ffffff;
+  --m-done:#1d7a3e; --m-done-bg:#e3f4e8;
+  --m-doing:#8a5a00; --m-doing-bg:#fff1d1;
+  --m-todo:#3d4756; --m-todo-bg:#e9edf2;
+  --m-revisit:#b3261e; --m-revisit-bg:#fde7e5;
+  --m-radius:12px; --m-tap:48px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--m-bg);color:var(--m-text);
+  font-size:16px;line-height:1.5;overflow-x:hidden;-webkit-text-size-adjust:100%}
+body.is-sheet-open{overflow:hidden}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--m-primary);outline-offset:2px}
+
+/* ヘッダー（APEX ではページのヘッダー＋Hero/Title Bar 相当） */
+.hdr{background:var(--m-surface);border-bottom:1px solid var(--m-line);padding:12px 16px 12px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hdr h1{font-size:20px;line-height:1.3;margin:0}
+.hdr .date{font-size:14px;color:var(--m-muted)}
+.progress{margin-top:10px}
+.progress-label{display:flex;justify-content:space-between;font-size:14px;color:var(--m-muted)}
+.progress-label strong{color:var(--m-text);font-size:16px}
+.bar{height:8px;border-radius:4px;background:var(--m-todo-bg);overflow:hidden;margin-top:4px}
+.bar span{display:block;height:100%;background:var(--m-done);width:0}
+
+/* 絞り込み（APEX では Radio Group の Pill Button 表示） */
+.filters{display:flex;gap:8px;padding:12px 16px 4px}
+.pill{flex:1 1 0;min-width:0;min-height:44px;border:1px solid var(--m-line);border-radius:22px;background:var(--m-surface);
+  font-size:15px;font-weight:600;padding:0 8px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--m-text);color:#fff;border-color:var(--m-text)}
+
+/* 今日の作業の縦一覧（APEX では Content Row） */
+.list{list-style:none;margin:8px 0 0;padding:0 12px}
+.job{margin:0 0 8px}
+.job-btn{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;min-height:72px;text-align:left;
+  background:var(--m-surface);border:1px solid var(--m-line);border-left:6px solid var(--st,var(--m-todo));border-radius:var(--m-radius);
+  padding:10px 10px 10px 12px;cursor:pointer}
+.job-time{display:block;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3;color:var(--m-muted)} /* APEX では Content Row の overline */
+.job-main{min-width:0}
+.job-title{font-size:17px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+.job-desc{font-size:14px;color:var(--m-muted);overflow-wrap:anywhere}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;padding:4px 8px;border-radius:12px;white-space:nowrap;
+  color:var(--st);background:var(--st-bg)}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.job-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.chev{width:10px;height:10px;border-right:2px solid var(--m-muted);border-top:2px solid var(--m-muted);transform:rotate(45deg);margin-right:4px}
+.st-done{--st:var(--m-done);--st-bg:var(--m-done-bg)}
+.st-doing{--st:var(--m-doing);--st-bg:var(--m-doing-bg)}
+.st-todo{--st:var(--m-todo);--st-bg:var(--m-todo-bg)}
+.st-revisit{--st:var(--m-revisit);--st-bg:var(--m-revisit-bg)}
+.job.is-hidden{display:none}
+.empty{display:none;margin:16px;padding:16px;background:var(--m-surface);border-radius:var(--m-radius);text-align:center;color:var(--m-muted)}
+
+.notes{margin:16px 12px 0;padding:12px 14px;background:var(--m-surface);border:1px dashed var(--m-line);border-radius:var(--m-radius);font-size:13px;color:var(--m-muted)}
+.notes h2{font-size:14px;margin:0 0 6px;color:var(--m-text)}
+.notes ul{margin:0;padding-left:18px}
+.spacer{height:96px} /* 下の操作帯に隠れないための余白 */
+
+/* 親指の届く下の操作帯（APEX では Buttons Container の「下に固定」系 Template Option を想定。references/patterns/mobile-field.md の7章） */
+.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--m-surface);border-top:1px solid var(--m-line);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border-radius:var(--m-radius);font-size:17px;font-weight:700;
+  border:1px solid var(--m-line);background:var(--m-surface);cursor:pointer;padding:0 12px;text-align:center;overflow-wrap:anywhere}
+.btn-primary{background:var(--m-primary);color:var(--m-primary-text);border-color:var(--m-primary)}
+.btn-primary small{font-weight:400;font-size:13px;margin-left:6px;opacity:.9}
+
+/* 下から出る入力パネル（APEX では Drawer の Position = Bottom） */
+.scrim{position:fixed;inset:0;background:rgba(10,14,20,.45);z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:88dvh;display:flex;flex-direction:column;background:var(--m-surface);
+  border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .22s ease;visibility:hidden}
+body.is-sheet-open .scrim{opacity:1;pointer-events:auto}
+body.is-sheet-open .sheet{transform:none;visibility:visible}
+@media (prefers-reduced-motion:reduce){.sheet,.scrim{transition:none}}
+.sheet-hdr{display:flex;align-items:flex-start;gap:8px;padding:10px 8px 8px 16px;border-bottom:1px solid var(--m-line)}
+.sheet-hdr .t{flex:1;min-width:0}
+.sheet-hdr h2{font-size:18px;margin:0;line-height:1.35;overflow-wrap:anywhere}
+.sheet-hdr p{margin:0;font-size:14px;color:var(--m-muted)}
+.icon-btn{flex:none;width:48px;height:48px;border:0;border-radius:24px;background:transparent;font-size:24px;line-height:1;cursor:pointer}
+.sheet-body{overflow-y:auto;padding:12px 16px;flex:1 1 auto}
+.field{margin:0 0 16px;border:0;padding:0;min-width:0}
+.field>legend,.field>label{display:block;font-size:15px;font-weight:700;margin-bottom:6px;padding:0}
+.req{font-size:12px;color:var(--m-revisit);margin-left:4px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg label{display:flex;align-items:center;justify-content:center;min-height:52px;border:2px solid var(--m-line);border-radius:var(--m-radius);
+  font-weight:700;font-size:15px;cursor:pointer;text-align:center;padding:0 4px}
+.seg input:checked+label{border-color:var(--st);background:var(--st-bg);color:var(--st)}
+.seg input:focus-visible+label{outline:3px solid var(--m-primary);outline-offset:2px}
+.times{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.times label{font-size:13px;color:var(--m-muted);display:block}
+input[type=time],textarea{width:100%;min-height:48px;border:1px solid var(--m-line);border-radius:10px;padding:8px 10px;background:#fff;font-size:16px}
+textarea{min-height:88px;resize:vertical}
+.photos{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.thumb{width:56px;height:56px;border-radius:8px;background:repeating-linear-gradient(45deg,#dfe5ec 0 6px,#eef2f6 6px 12px);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--m-muted)}
+.btn-sec{width:auto;min-height:48px;font-size:15px;padding:0 14px}
+.revisit-only{display:none}
+.revisit-only.is-shown{display:block}
+.sheet-ftr{padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--m-line);background:var(--m-surface)}
+.toast{position:fixed;left:12px;right:12px;bottom:84px;z-index:30;background:var(--m-text);color:#fff;border-radius:10px;padding:12px 14px;font-size:15px;
+  display:none}
+.toast.is-shown{display:block}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-top">
+    <h1>今日の作業</h1>
+    <span class="date">11月2日（月）担当：作業員A</span>
+  </div>
+  <div class="progress" aria-live="polite">
+    <div class="progress-label"><span>終わった作業</span><strong id="prog-text">2 / 6 件</strong></div>
+    <div class="bar" role="presentation"><span id="prog-bar"></span></div>
+  </div>
+</header>
+
+<div class="filters" role="group" aria-label="絞り込み">
+  <button class="pill" type="button" data-f="all" aria-pressed="true">すべて</button>
+  <button class="pill" type="button" data-f="open" aria-pressed="false">未完了</button>
+  <button class="pill" type="button" data-f="done" aria-pressed="false">完了</button>
+</div>
+
+<main>
+  <ul class="list" id="list"></ul>
+  <p class="empty" id="empty">この条件の作業はありません。「すべて」に戻してください。</p>
+
+  <section class="notes" aria-label="見本についての注記">
+    <h2>この見本について</h2>
+    <ul>
+      <li>架空の業務（設備点検の訪問）の見本です。現場名・人名はすべて作り話です。</li>
+      <li>一覧は APEX の Content Row、下から出る入力欄は Drawer（Position＝Bottom）を想定しています。</li>
+      <li>左端の状態の色の帯と、パネル上の角丸は CSS が必要です。下の操作帯の固定は Buttons Container の Template Option で出せる見込みです（実機未確認）。</li>
+    </ul>
+  </section>
+  <div class="spacer"></div>
+</main>
+
+<div class="actionbar">
+  <button class="btn btn-primary" type="button" id="next-btn">次の作業を記録<small id="next-sub"></small></button>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+  <div class="sheet-hdr">
+    <div class="t">
+      <h2 id="sheet-title">—</h2>
+      <p id="sheet-sub">—</p>
+    </div>
+    <button class="icon-btn" type="button" id="close-btn" aria-label="閉じる">×</button>
+  </div>
+  <form class="sheet-body" id="form" onsubmit="return false">
+    <fieldset class="field">
+      <legend>結果<span class="req">必須</span></legend>
+      <div class="seg">
+        <input type="radio" name="res" id="r-done" value="done"><label for="r-done" class="st-done">完了</label>
+        <input type="radio" name="res" id="r-doing" value="doing"><label for="r-doing" class="st-doing">一部完了</label>
+        <input type="radio" name="res" id="r-revisit" value="revisit"><label for="r-revisit" class="st-revisit">要再訪</label>
+      </div>
+    </fieldset>
+    <div class="field revisit-only" id="revisit-box">
+      <label for="reason">再訪の理由<span class="req">必須</span></label>
+      <textarea id="reason" placeholder="例：部品の取り寄せが必要"></textarea>
+    </div>
+    <div class="field">
+      <span style="display:block;font-size:15px;font-weight:700;margin-bottom:6px">作業時間</span>
+      <div class="times">
+        <div><label for="t1">開始</label><input type="time" id="t1" value="09:00"></div>
+        <div><label for="t2">終了</label><input type="time" id="t2" value="09:40"></div>
+      </div>
+    </div>
+    <div class="field">
+      <span style="display:block;font-size:15px;font-weight:700;margin-bottom:6px">写真</span>
+      <div class="photos">
+        <div class="thumb" aria-hidden="true">写真1</div>
+        <button class="btn btn-sec" type="button">写真を追加</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="memo">メモ</label>
+      <textarea id="memo" placeholder="気づいたこと"></textarea>
+    </div>
+  </form>
+  <div class="sheet-ftr">
+    <button class="btn btn-primary" type="button" id="save-btn">結果を登録</button>
+  </div>
+</section>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const jobs=[
+  {id:1,time:"08:30",place:"北町３丁目 集合住宅",work:"給水ポンプ 定期点検",st:"done"},
+  {id:2,time:"09:00",place:"川べり公民館",work:"空調フィルター交換",st:"done"},
+  {id:3,time:"10:30",place:"南台２丁目 戸建て",work:"給湯器 異音の確認",st:"doing"},
+  {id:4,time:"13:00",place:"中央通り 店舗ビル３階",work:"換気扇 交換",st:"todo"},
+  {id:5,time:"14:30",place:"東坂 倉庫",work:"消火設備 点検（前回 要再訪）",st:"revisit"},
+  {id:6,time:"16:00",place:"西の森 保育施設",work:"排水管 清掃",st:"todo"}
+];
+const label={done:"完了",doing:"作業中",todo:"未着手",revisit:"要再訪"};
+let filter="all", current=null;
+const $=s=>document.querySelector(s);
+function nextJob(){return jobs.find(j=>j.st!=="done"&&!j.saved);}
+function render(){
+  const ul=$("#list"); ul.innerHTML="";
+  let shown=0;
+  jobs.forEach(j=>{
+    const hide=(filter==="done"&&j.st!=="done")||(filter==="open"&&j.st==="done");
+    if(!hide) shown++;
+    const li=document.createElement("li");
+    li.className="job st-"+j.st+(hide?" is-hidden":"");
+    li.innerHTML=`<button type="button" class="job-btn" data-id="${j.id}" aria-label="${j.time} ${j.place} ${j.work} 状態：${label[j.st]}">
+      <span class="job-main"><span class="job-time">${j.time}</span><span class="job-title">${j.place}</span><br><span class="job-desc">${j.work}</span></span>
+      <span class="job-side"><span class="badge">${label[j.st]}</span><span class="chev" aria-hidden="true"></span></span></button>`;
+    ul.appendChild(li);
+  });
+  $("#empty").style.display=shown?"none":"block";
+  const done=jobs.filter(j=>j.st==="done").length;
+  $("#prog-text").textContent=done+" / "+jobs.length+" 件";
+  $("#prog-bar").style.width=(done/jobs.length*100)+"%";
+  const nx=nextJob();
+  const nb=$("#next-btn");
+  if(nx){nb.disabled=false;$("#next-sub").textContent="（"+nx.time+"）";}else{nb.disabled=true;$("#next-sub").textContent="（すべて記録済み）";}
+}
+function openSheet(id){
+  current=jobs.find(j=>j.id===id); if(!current) return;
+  $("#sheet-title").textContent=current.place;
+  $("#sheet-sub").textContent=current.time+"　"+current.work;
+  document.querySelectorAll("input[name=res]").forEach(r=>r.checked=false);
+  $("#revisit-box").classList.remove("is-shown");
+  document.body.classList.add("is-sheet-open");
+  $("#sheet").setAttribute("aria-hidden","false");
+  setTimeout(()=>$("#close-btn").focus(),50);
+}
+function closeSheet(){
+  document.body.classList.remove("is-sheet-open");
+  $("#sheet").setAttribute("aria-hidden","true");
+}
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("is-shown");setTimeout(()=>e.classList.remove("is-shown"),2200);}
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".job-btn"); if(b){openSheet(+b.dataset.id);return;}
+  const p=e.target.closest(".pill"); if(p){filter=p.dataset.f;document.querySelectorAll(".pill").forEach(x=>x.setAttribute("aria-pressed",x===p));render();}
+});
+$("#next-btn").onclick=()=>{const nx=nextJob(); if(nx) openSheet(nx.id);};
+$("#close-btn").onclick=closeSheet; $("#scrim").onclick=closeSheet;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet();});
+document.querySelectorAll("input[name=res]").forEach(r=>r.onchange=()=>{
+  $("#revisit-box").classList.toggle("is-shown",r.value==="revisit"&&r.checked);
+});
+$("#save-btn").onclick=()=>{
+  const r=document.querySelector("input[name=res]:checked");
+  if(!r){toast("結果を選んでください");return;}
+  if(r.value==="revisit"&&!$("#reason").value.trim()){toast("再訪の理由を書いてください");$("#reason").focus();return;}
+  current.st=r.value; current.saved=true; closeSheet(); render(); toast(current.place+"：「"+label[r.value]+"」で登録しました（見本）");
+};
+render();
+if(location.hash==="#drawer") openSheet(3);
+</script>
+</body>
+</html>

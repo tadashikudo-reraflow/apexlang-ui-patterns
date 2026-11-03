@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>見本：シフト盤型（週間勤務表）</title>
+<style>
+/* 見本用。APEXの変数名を同じ名前で仮に定義（実機未確認） */
+:root{
+  --ut-palette-primary:#0F6E6E; --ut-palette-primary-contrast:#fff;
+  --ut-palette-danger:#A4262C; --ut-palette-warning:#8A5A00;
+  --ut-body-background-color:#EEF0EF; --ut-component-background-color:#fff;
+  --ut-component-border-color:rgba(0,0,0,.12); --ut-component-border-radius:8px;
+  --ut-component-text-muted-color:rgba(0,0,0,.6); --ut-body-actions-width:320px;
+  --a-gv-cell-height:40px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;background:var(--ut-body-background-color);color:#1f2a2a;font-size:13px}
+header{height:46px;display:flex;align-items:center;gap:12px;padding:0 16px;background:#fff;border-bottom:1px solid var(--ut-component-border-color)}
+header b{font-size:15px}header span{color:var(--ut-component-text-muted-color)}
+.layout{display:grid;grid-template-columns:1fr var(--ut-body-actions-width);min-height:calc(100vh - 46px)}
+main{padding:16px 20px;overflow:auto}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+h1{font-size:18px;margin:0}
+.wk{display:flex;gap:4px}.wk button{font:inherit;border:1px solid var(--ut-component-border-color);background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px;padding:0;list-style:none;font-size:12px;color:var(--ut-component-text-muted-color)}
+.legend li{display:flex;align-items:center;gap:4px}
+.legend .chip{width:26px;height:22px;font-size:11px;cursor:default}
+table{border-collapse:separate;border-spacing:4px;min-width:760px}
+thead th{font-size:12px;font-weight:600;color:#3d4a4a;padding:2px 4px;text-align:center}
+thead th.we{color:var(--ut-palette-danger)}
+tbody th{text-align:left;font-weight:600;padding:0 8px 0 0;white-space:nowrap;position:sticky;left:0;background:var(--ut-body-background-color)}
+tbody th small{display:block;font-weight:400;color:var(--ut-component-text-muted-color);font-size:11px}
+td{padding:0}
+.chip{position:relative;width:76px;height:var(--a-gv-cell-height);border-radius:var(--ut-component-border-radius);border:1px solid rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font:inherit;font-size:15px;cursor:pointer;box-shadow:0 2px 3px -2px rgba(0,0,0,.35)}
+.chip b{font-weight:700}
+.chip.E{background:#FFE9B8;color:#5a3f00}
+.chip.D{background:#D6ECF8;color:#0d3d5a}
+.chip.L{background:#E6DDF5;color:#3b2466;background-image:linear-gradient(0deg,rgba(0,0,0,.12) 0 3px,transparent 3px)}
+.chip.N{background:#28415C;color:#fff;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.12) 0 4px,transparent 4px 9px)}
+.chip.A{background:#fff;color:#28415C;border:2px solid #28415C}
+.chip.O{background:transparent;color:#6b7777;border:2px dashed #b9c2c1;box-shadow:none}
+.chip.sel{outline:3px solid var(--ut-palette-primary);outline-offset:2px}
+.chip .wn{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--ut-palette-warning);color:#fff;font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+td.h{text-align:right;padding-left:8px;font-variant-numeric:tabular-nums;color:#3d4a4a;white-space:nowrap}
+td.h .over{color:var(--ut-palette-warning);font-weight:700}td.h .over::before{content:"! "}
+tfoot th{text-align:left;font-size:12px;padding-right:8px;white-space:nowrap}
+tfoot td{background:#fff;border-radius:6px;padding:4px;vertical-align:top}
+tfoot td span{display:inline-block;font-size:11px;font-variant-numeric:tabular-nums;margin:1px;padding:0 3px;border-radius:3px}
+tfoot td .ok{color:#3d6b4a}tfoot td .plus{color:var(--ut-component-text-muted-color)}
+tfoot td .lack{background:var(--ut-palette-danger);color:#fff;font-weight:700}
+tfoot td.bad{box-shadow:inset 0 0 0 2px var(--ut-palette-danger)}
+aside{background:#fff;border-left:1px solid var(--ut-component-border-color);padding:16px;display:flex;flex-direction:column;gap:16px}
+.hot{font:inherit;width:100%;padding:10px;border:0;border-radius:6px;background:var(--ut-palette-primary);color:var(--ut-palette-primary-contrast);font-weight:700;font-size:14px;cursor:pointer}
+.sub{font-size:12px;color:var(--ut-component-text-muted-color);margin-top:4px}
+aside h2{font-size:13px;margin:0 0 8px}
+.edit label{display:block;font-size:12px;color:var(--ut-component-text-muted-color);margin:8px 0 2px}
+.edit select,.edit input{font:inherit;width:100%;padding:6px 8px;border:1px solid var(--ut-component-border-color);border-radius:6px;background:#fff}
+.warns{list-style:none;margin:0;padding:0}
+.warns li{display:flex;gap:8px;padding:8px 0;border-top:1px solid rgba(0,0,0,.06)}
+.warns .ic{flex:none;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.warns .r .ic{background:var(--ut-palette-danger)}.warns .y .ic{background:var(--ut-palette-warning)}
+.warns small{display:block;color:var(--ut-component-text-muted-color)}
+.note{font-size:11px;color:var(--ut-component-text-muted-color);margin-top:10px}
+@media (max-width:980px){.layout{grid-template-columns:1fr}aside{border-left:0;border-top:1px solid var(--ut-component-border-color)}}
+</style>
+</head>
+<body>
+<header><b>勤務表</b><span>みなと台ケアホーム ／ 介護フロア2階</span></header>
+<div class="layout">
+<main>
+  <div class="top"><h1>11/9（月）〜 11/15（日）</h1><div class="wk"><button type="button" aria-label="前の週">‹ 前週</button><button type="button" aria-label="次の週">次週 ›</button></div></div>
+  <ul class="legend" aria-label="札の見方">
+    <li><span class="chip E"><b>早</b></span>早番 7-16</li>
+    <li><span class="chip D"><b>日</b></span>日勤 9-18</li>
+    <li><span class="chip L"><b>遅</b></span>遅番 13-22（下線）</li>
+    <li><span class="chip N"><b>夜</b></span>夜勤 21-翌9（斜線）</li>
+    <li><span class="chip A"><b>明</b></span>夜勤明け（太枠）</li>
+    <li><span class="chip O"><b>休</b></span>休み（点線）</li>
+  </ul>
+  <table aria-label="週間勤務表">
+    <thead><tr><th></th><th scope="col">11/9 月</th><th scope="col">11/10 火</th><th scope="col">11/11 水</th><th scope="col">11/12 木</th><th scope="col">11/13 金</th><th scope="col" class=we>11/14 土</th><th scope="col" class=we>11/15 日</th><th>週計</th></tr></thead>
+    <tbody>
+<tr><th scope="row"><span class="nm">山本 さくら</span><small>正社員</small></th><td><button type="button" class="chip E" aria-label="山本 さくら 11/9 月 早番 7-16"><b>早</b></button></td><td><button type="button" class="chip D" aria-label="山本 さくら 11/10 火 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip D" aria-label="山本 さくら 11/11 水 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip L" aria-label="山本 さくら 11/12 木 遅番 13-22"><b>遅</b></button></td><td><button type="button" class="chip O" aria-label="山本 さくら 11/13 金 休み"><b>休</b></button></td><td><button type="button" class="chip E" aria-label="山本 さくら 11/14 土 早番 7-16"><b>早</b></button></td><td><button type="button" class="chip O" aria-label="山本 さくら 11/15 日 休み"><b>休</b></button></td><td class="h"><span>40h</span></td></tr>
+<tr><th scope="row"><span class="nm">中村 健</span><small>正社員</small></th><td><button type="button" class="chip N" aria-label="中村 健 11/9 月 夜勤 21-翌9"><b>夜</b></button></td><td><button type="button" class="chip A" aria-label="中村 健 11/10 火 夜勤明け"><b>明</b></button></td><td><button type="button" class="chip O" aria-label="中村 健 11/11 水 休み"><b>休</b></button></td><td><button type="button" class="chip D" aria-label="中村 健 11/12 木 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip D" aria-label="中村 健 11/13 金 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip O" aria-label="中村 健 11/14 土 休み"><b>休</b></button></td><td><button type="button" class="chip E" aria-label="中村 健 11/15 日 早番 7-16"><b>早</b></button></td><td class="h"><span>40h</span></td></tr>
+<tr><th scope="row"><span class="nm">小林 由美</span><small>パート</small></th><td><button type="button" class="chip D" aria-label="小林 由美 11/9 月 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip D" aria-label="小林 由美 11/10 火 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip O" aria-label="小林 由美 11/11 水 休み"><b>休</b></button></td><td><button type="button" class="chip E sel" aria-label="小林 由美 11/12 木 早番 7-16"><b>早</b></button></td><td><button type="button" class="chip O" aria-label="小林 由美 11/13 金 休み"><b>休</b></button></td><td><button type="button" class="chip O" aria-label="小林 由美 11/14 土 休み"><b>休</b></button></td><td><button type="button" class="chip D" aria-label="小林 由美 11/15 日 日勤 9-18"><b>日</b></button></td><td class="h"><span>32h</span></td></tr>
+<tr><th scope="row"><span class="nm">加藤 翔</span><small>正社員</small></th><td><button type="button" class="chip L" aria-label="加藤 翔 11/9 月 遅番 13-22"><b>遅</b></button></td><td><button type="button" class="chip O" aria-label="加藤 翔 11/10 火 休み"><b>休</b></button></td><td><button type="button" class="chip N" aria-label="加藤 翔 11/11 水 夜勤 21-翌9"><b>夜</b></button></td><td><button type="button" class="chip A" aria-label="加藤 翔 11/12 木 夜勤明け"><b>明</b></button></td><td><button type="button" class="chip O" aria-label="加藤 翔 11/13 金 休み"><b>休</b></button></td><td><button type="button" class="chip D" aria-label="加藤 翔 11/14 土 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip D" aria-label="加藤 翔 11/15 日 日勤 9-18"><b>日</b></button></td><td class="h"><span>40h</span></td></tr>
+<tr><th scope="row"><span class="nm">吉田 愛</span><small>パート</small></th><td><button type="button" class="chip O" aria-label="吉田 愛 11/9 月 休み"><b>休</b></button></td><td><button type="button" class="chip E" aria-label="吉田 愛 11/10 火 早番 7-16"><b>早</b></button></td><td><button type="button" class="chip E" aria-label="吉田 愛 11/11 水 早番 7-16"><b>早</b></button></td><td><button type="button" class="chip D" aria-label="吉田 愛 11/12 木 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip L" aria-label="吉田 愛 11/13 金 遅番 13-22"><b>遅</b></button></td><td><button type="button" class="chip O" aria-label="吉田 愛 11/14 土 休み"><b>休</b></button></td><td><button type="button" class="chip O" aria-label="吉田 愛 11/15 日 休み"><b>休</b></button></td><td class="h"><span>32h</span></td></tr>
+<tr><th scope="row"><span class="nm">山田 陽介</span><small>正社員</small></th><td><button type="button" class="chip D" aria-label="山田 陽介 11/9 月 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip L" aria-label="山田 陽介 11/10 火 遅番 13-22"><b>遅</b></button></td><td><button type="button" class="chip L" aria-label="山田 陽介 11/11 水 遅番 13-22"><b>遅</b></button></td><td><button type="button" class="chip O" aria-label="山田 陽介 11/12 木 休み"><b>休</b></button></td><td><button type="button" class="chip E" aria-label="山田 陽介 11/13 金 早番 7-16"><b>早</b></button></td><td><button type="button" class="chip D" aria-label="山田 陽介 11/14 土 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip L" aria-label="山田 陽介 11/15 日 遅番 13-22"><b>遅</b></button></td><td class="h"><span class="over">48h</span></td></tr>
+<tr><th scope="row"><span class="nm">佐々木 恵</span><small>パート</small></th><td><button type="button" class="chip E" aria-label="佐々木 恵 11/9 月 早番 7-16"><b>早</b></button></td><td><button type="button" class="chip D" aria-label="佐々木 恵 11/10 火 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip D" aria-label="佐々木 恵 11/11 水 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip O" aria-label="佐々木 恵 11/12 木 休み"><b>休</b></button></td><td><button type="button" class="chip O" aria-label="佐々木 恵 11/13 金 休み"><b>休</b></button></td><td><button type="button" class="chip L" aria-label="佐々木 恵 11/14 土 遅番 13-22"><b>遅</b></button></td><td><button type="button" class="chip N" aria-label="佐々木 恵 11/15 日 夜勤 21-翌9"><b>夜</b></button></td><td class="h"><span class="over">48h</span></td></tr>
+<tr><th scope="row"><span class="nm">松本 大輔</span><small>正社員</small></th><td><button type="button" class="chip O" aria-label="松本 大輔 11/9 月 休み"><b>休</b></button></td><td><button type="button" class="chip O" aria-label="松本 大輔 11/10 火 休み"><b>休</b></button></td><td><button type="button" class="chip D" aria-label="松本 大輔 11/11 水 日勤 9-18"><b>日</b></button></td><td><button type="button" class="chip N" aria-label="松本 大輔 11/12 木 夜勤 21-翌9"><b>夜</b></button></td><td><button type="button" class="chip A" aria-label="松本 大輔 11/13 金 夜勤明け"><b>明</b></button></td><td><button type="button" class="chip D" aria-label="松本 大輔 11/14 土 日勤 9-18"><b>日</b> <i class="wn" title="警告あり">!</i></button></td><td><button type="button" class="chip O" aria-label="松本 大輔 11/15 日 休み"><b>休</b></button></td><td class="h"><span>32h</span></td></tr>
+    </tbody>
+    <tfoot><tr><th scope="row">必要人数との差<br><small>早1・日2・遅1・夜1</small></th><td class=""><span class="plus">早＋1</span><span class="ok">日✓</span><span class="ok">遅✓</span><span class="ok">夜✓</span></td><td class="bad"><span class="ok">早✓</span><span class="plus">日＋1</span><span class="ok">遅✓</span><span class="lack">夜▲1</span></td><td class=""><span class="ok">早✓</span><span class="plus">日＋1</span><span class="ok">遅✓</span><span class="ok">夜✓</span></td><td class=""><span class="ok">早✓</span><span class="ok">日✓</span><span class="ok">遅✓</span><span class="ok">夜✓</span></td><td class="bad"><span class="ok">早✓</span><span class="lack">日▲1</span><span class="ok">遅✓</span><span class="lack">夜▲1</span></td><td class="bad"><span class="ok">早✓</span><span class="plus">日＋1</span><span class="ok">遅✓</span><span class="lack">夜▲1</span></td><td class=""><span class="ok">早✓</span><span class="ok">日✓</span><span class="ok">遅✓</span><span class="ok">夜✓</span></td><td></td></tr></tfoot>
+  </table>
+  <p class="note">※見本です。APEX 26.1 の実機では未確認。盤面は Interactive Grid（人×日付）、右は Right Side Column の想定。</p>
+</main>
+<aside aria-label="編集と警告">
+  <div><button class="hot" type="button">この週の勤務表を確定</button><div class="sub">確定するとスタッフのスマホに通知されます（見本の説明）。</div></div>
+  <section class="edit" aria-label="選んだ札の編集">
+    <h2>選んだ札：小林 由美・11/12 木</h2>
+    <label for="sh">勤務</label>
+    <select id="sh"><option>早番 7-16</option><option>日勤 9-18</option><option>遅番 13-22</option><option>夜勤 21-翌9</option><option>休み</option></select>
+    <label for="mm">メモ</label><input id="mm" value="通院のため 15時まで">
+  </section>
+  <section aria-label="警告">
+    <h2>警告 7件</h2>
+    <ul class="warns">
+      <li class="r"><span class="ic">▲</span><div>11/10 火 夜勤が1人足りない<small>必要1・配置0</small></div></li>
+      <li class="r"><span class="ic">▲</span><div>11/13 金 日勤が1人足りない<small>必要2・配置1</small></div></li>
+      <li class="r"><span class="ic">▲</span><div>11/13 金 夜勤が1人足りない<small>必要1・配置0</small></div></li>
+      <li class="r"><span class="ic">▲</span><div>11/14 土 夜勤が1人足りない<small>必要1・配置0</small></div></li>
+      <li class="y"><span class="ic">!</span><div>山田 陽介：週40時間を超えています<small>合計 48h</small></div></li>
+      <li class="y"><span class="ic">!</span><div>佐々木 恵：週40時間を超えています<small>合計 48h</small></div></li>
+      <li class="y"><span class="ic">!</span><div>松本 大輔：夜勤明けの翌日に日勤<small>11/13 金 明け → 11/14 土 日勤 9-18</small></div></li>
+    </ul>
+  </section>
+</aside>
+</div>
+</body>
+</html>

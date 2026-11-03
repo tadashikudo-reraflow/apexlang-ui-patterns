@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>見本：台帳グリッド型（受注台帳）</title>
+<style>
+/* 見本用。APEXの変数名を同じ名前で仮に定義（実機未確認） */
+:root{
+  --ut-palette-primary:#1F4E79; --ut-palette-primary-contrast:#fff;
+  --ut-palette-success:#2E6B3A; --ut-palette-warning:#8A5A00; --ut-palette-danger:#A4262C;
+  --ut-body-background-color:#F6F7F9; --ut-component-background-color:#fff;
+  --ut-component-border-color:rgba(0,0,0,.12); --ut-component-inner-border-color:rgba(0,0,0,.08);
+  --ut-component-border-radius:2px; --ut-component-toolbar-background-color:#F1F3F6;
+  --ut-component-highlight-background-color:rgba(31,78,121,.06); --ut-component-text-muted-color:rgba(0,0,0,.6);
+  --a-gv-cell-height:28px; --a-gv-header-cell-height:30px; --a-gv-cell-padding-x:8px; --a-gv-font-size:13px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;background:var(--ut-body-background-color);color:#1d1d1d;font-size:13px}
+header{height:44px;display:flex;align-items:center;padding:0 16px;background:var(--ut-palette-primary);color:#fff;gap:16px}
+header nav a{color:#fff;opacity:.8;text-decoration:none;font-size:13px} header nav a.on{opacity:1;font-weight:700}
+main{padding:16px 20px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+h1{font-size:18px;margin:0}
+.top .cnt{color:var(--ut-component-text-muted-color)}
+.btn{font:inherit;padding:7px 12px;border:1px solid var(--ut-component-border-color);background:#fff;border-radius:2px;cursor:pointer}
+.btn.hot{background:var(--ut-palette-primary);border-color:var(--ut-palette-primary);color:#fff;font-weight:700;padding:7px 18px}
+.ml{margin-left:auto}
+.metrics{display:flex;gap:12px;margin-bottom:12px}
+.mc{flex:1;background:#fff;border:1px solid var(--ut-component-border-color);border-radius:2px;padding:10px 14px;cursor:pointer;text-align:left;font:inherit}
+.mc small{display:block;color:var(--ut-component-text-muted-color)}
+.mc strong{font-size:22px;font-variant-numeric:tabular-nums}
+.mc span{font-size:12px;color:var(--ut-component-text-muted-color);margin-left:6px}
+.mc.on{box-shadow:inset 0 -3px 0 var(--ut-palette-primary)}
+.grid{background:#fff;border:1px solid var(--ut-component-border-color);border-radius:2px}
+.tb{display:flex;gap:8px;align-items:center;padding:6px 8px;background:var(--ut-component-toolbar-background-color);border-bottom:1px solid var(--ut-component-inner-border-color)}
+.tb input[type=search]{font:inherit;padding:5px 8px;border:1px solid var(--ut-component-border-color);width:260px;border-radius:2px}
+.chip{font-size:12px;padding:2px 8px;border:1px solid var(--ut-palette-primary);color:var(--ut-palette-primary);border-radius:12px}
+.scroll{max-height:calc(100vh - 230px);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:var(--a-gv-font-size)}
+thead th{position:sticky;top:0;background:var(--ut-component-toolbar-background-color);height:var(--a-gv-header-cell-height);padding:0 var(--a-gv-cell-padding-x);text-align:left;font-weight:600;color:#444;border-bottom:1px solid var(--ut-component-border-color);white-space:nowrap}
+td{height:var(--a-gv-cell-height);padding:0 var(--a-gv-cell-padding-x);border-bottom:1px solid var(--ut-component-inner-border-color);white-space:nowrap}
+th.n,td.n{text-align:right;font-variant-numeric:tabular-nums}
+td.amt{font-weight:600}
+td.mono{font-variant-numeric:tabular-nums} td a{color:var(--ut-palette-primary);text-decoration:none}
+td.ck,th.ck{width:30px}
+tbody tr:hover td{background:var(--ut-component-highlight-background-color)}
+tr.sel td{background:var(--ut-component-highlight-background-color)} tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--ut-palette-primary)}
+.bd{font-size:12px;padding:1px 6px;border-radius:2px;background:#eef0f3}
+.bd.ship{background:#E8EEF6;color:var(--ut-palette-primary)} .bd.done{background:#E7F1E9;color:var(--ut-palette-success)}
+.bd.pay{background:#F6EEDF;color:var(--ut-palette-warning)} .bd.warn{background:#F8E5E6;color:var(--ut-palette-danger);font-weight:700}
+.foot{display:flex;justify-content:space-between;padding:6px 10px;color:var(--ut-component-text-muted-color);border-top:1px solid var(--ut-component-inner-border-color)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:420px;background:#fff;box-shadow:-12px 0 24px -12px rgba(0,0,0,.3);display:flex;flex-direction:column}
+.drawer h2{margin:0;font-size:16px;padding:14px 16px;border-bottom:1px solid var(--ut-component-inner-border-color);display:flex;justify-content:space-between}
+.drawer .body{padding:12px 16px;overflow:auto;flex:1}
+.drawer dl{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;margin:0}
+.drawer dt{color:var(--ut-component-text-muted-color)} .drawer dd{margin:0}
+.drawer .f{padding:10px 16px;border-top:1px solid var(--ut-component-inner-border-color);display:flex;gap:8px;justify-content:flex-end}
+.drawer .btn.save{background:var(--ut-palette-primary);color:#fff;border-color:var(--ut-palette-primary);font-weight:700}
+.with-drawer main{margin-right:420px}
+.note{font-size:11px;color:var(--ut-component-text-muted-color);margin-top:8px}
+@media (max-width:1000px){.drawer{display:none}.with-drawer main{margin-right:0}.metrics{flex-wrap:wrap}.mc{flex:1 1 40%}}
+</style>
+</head>
+<body class="with-drawer">
+<header><b>販売管理</b><nav><a class="on" href="#">受注台帳</a> <a href="#">出荷</a> <a href="#">請求</a> <a href="#">顧客</a></nav></header>
+<main>
+  <div class="top"><h1>受注台帳</h1><span class="cnt">2026年10月・36件</span><button class="btn hot ml" type="button">受注を登録</button></div>
+  <div class="metrics">
+    <button class="mc" type="button"><small>今月の受注額</small><strong>¥18,426,000</strong><span>前月比 +8%</span></button>
+    <button class="mc" type="button" aria-pressed="false"><small>出荷待ち</small><strong>12</strong><span>件</span></button>
+    <button class="mc" type="button"><small>入金待ち</small><strong>7</strong><span>件</span></button>
+    <button class="mc" type="button"><small>要対応</small><strong>2</strong><span>件</span></button>
+  </div>
+  <div class="grid">
+    <div class="tb"><input type="search" placeholder="受注番号・顧客名で探す" aria-label="検索"><button class="btn ml" type="button">列の表示</button><button class="btn" type="button">ダウンロード</button></div>
+    <div class="scroll">
+    <table>
+      <thead><tr><th class="ck"></th><th>受注番号</th><th class="n">受注日</th><th>顧客</th><th>品目</th><th class="n">数量</th><th class="n">金額（円）</th><th>担当</th><th>状態</th></tr></thead>
+      <tbody>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261100を選ぶ"></td><td class="mono"><a href="#">J-261100</a></td><td class="n">10/11</td><td>みなと食品</td><td>配送委託（月額）</td><td class="n">42</td><td class="n amt">50,400</td><td>伊藤</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261101を選ぶ"></td><td class="mono"><a href="#">J-261101</a></td><td class="n">10/04</td><td>さくら薬局</td><td>空調工事</td><td class="n">1</td><td class="n amt">120,000</td><td>佐藤</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261102を選ぶ"></td><td class="mono"><a href="#">J-261102</a></td><td class="n">10/14</td><td>見本商事</td><td>保守契約（年間）</td><td class="n">16</td><td class="n amt">19,200</td><td>佐藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr class=sel><td class="ck"><input type="checkbox" aria-label="J-261103を選ぶ"></td><td class="mono"><a href="#">J-261103</a></td><td class="n">10/27</td><td>見本不動産</td><td>保守契約（年間）</td><td class="n">1</td><td class="n amt">256,000</td><td>佐藤</td><td><span class="bd pay">◷ 入金待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261104を選ぶ"></td><td class="mono"><a href="#">J-261104</a></td><td class="n">10/19</td><td>見本不動産</td><td>配送委託（月額）</td><td class="n">4</td><td class="n amt">19,200</td><td>鈴木</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261105を選ぶ"></td><td class="mono"><a href="#">J-261105</a></td><td class="n">10/10</td><td>見本商事</td><td>梱包資材</td><td class="n">35</td><td class="n amt">42,000</td><td>伊藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261106を選ぶ"></td><td class="mono"><a href="#">J-261106</a></td><td class="n">10/27</td><td>千代田システム</td><td>梱包資材</td><td class="n">1</td><td class="n amt">120,000</td><td>鈴木</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261107を選ぶ"></td><td class="mono"><a href="#">J-261107</a></td><td class="n">10/12</td><td>北斗物流</td><td>金型修理</td><td class="n">46</td><td class="n amt">55,200</td><td>伊藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261108を選ぶ"></td><td class="mono"><a href="#">J-261108</a></td><td class="n">10/07</td><td>ひかり印刷</td><td>金型修理</td><td class="n">1</td><td class="n amt">980,000</td><td>伊藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261109を選ぶ"></td><td class="mono"><a href="#">J-261109</a></td><td class="n">10/30</td><td>ひかり印刷</td><td>レジ端末 3台</td><td class="n">20</td><td class="n amt">96,000</td><td>渡辺</td><td><span class="bd pay">◷ 入金待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261110を選ぶ"></td><td class="mono"><a href="#">J-261110</a></td><td class="n">10/25</td><td>見本建設</td><td>保守契約（年間）</td><td class="n">37</td><td class="n amt">584,600</td><td>高橋</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261111を選ぶ"></td><td class="mono"><a href="#">J-261111</a></td><td class="n">10/24</td><td>ひかり印刷</td><td>業務用冷蔵庫</td><td class="n">39</td><td class="n amt">46,800</td><td>田中</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261112を選ぶ"></td><td class="mono"><a href="#">J-261112</a></td><td class="n">10/06</td><td>さくら薬局</td><td>梱包資材</td><td class="n">60</td><td class="n amt">2,280,000</td><td>渡辺</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261113を選ぶ"></td><td class="mono"><a href="#">J-261113</a></td><td class="n">10/03</td><td>丸山製作所</td><td>空調工事</td><td class="n">1</td><td class="n amt">980,000</td><td>渡辺</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261114を選ぶ"></td><td class="mono"><a href="#">J-261114</a></td><td class="n">10/12</td><td>見本不動産</td><td>チラシ印刷 1万部</td><td class="n">1</td><td class="n amt">980,000</td><td>佐藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261115を選ぶ"></td><td class="mono"><a href="#">J-261115</a></td><td class="n">10/31</td><td>中央電材</td><td>チラシ印刷 1万部</td><td class="n">1</td><td class="n amt">256,000</td><td>渡辺</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261116を選ぶ"></td><td class="mono"><a href="#">J-261116</a></td><td class="n">10/23</td><td>中央電材</td><td>空調工事</td><td class="n">1</td><td class="n amt">980,000</td><td>渡辺</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261117を選ぶ"></td><td class="mono"><a href="#">J-261117</a></td><td class="n">10/13</td><td>千代田システム</td><td>レジ端末 3台</td><td class="n">2</td><td class="n amt">76,000</td><td>伊藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261118を選ぶ"></td><td class="mono"><a href="#">J-261118</a></td><td class="n">10/04</td><td>ひかり印刷</td><td>制御盤 一式</td><td class="n">1</td><td class="n amt">980,000</td><td>渡辺</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261119を選ぶ"></td><td class="mono"><a href="#">J-261119</a></td><td class="n">10/08</td><td>見本商事</td><td>配送委託（月額）</td><td class="n">1</td><td class="n amt">980,000</td><td>鈴木</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261120を選ぶ"></td><td class="mono"><a href="#">J-261120</a></td><td class="n">10/15</td><td>見本商事</td><td>金型修理</td><td class="n">18</td><td class="n amt">86,400</td><td>伊藤</td><td><span class="bd warn">! 要対応</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261121を選ぶ"></td><td class="mono"><a href="#">J-261121</a></td><td class="n">10/09</td><td>富士見ホテル</td><td>配送委託（月額）</td><td class="n">1</td><td class="n amt">256,000</td><td>鈴木</td><td><span class="bd new">＋ 受付</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261122を選ぶ"></td><td class="mono"><a href="#">J-261122</a></td><td class="n">10/05</td><td>北斗物流</td><td>梱包資材</td><td class="n">10</td><td class="n amt">48,000</td><td>佐藤</td><td><span class="bd pay">◷ 入金待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261123を選ぶ"></td><td class="mono"><a href="#">J-261123</a></td><td class="n">10/16</td><td>見本不動産</td><td>梱包資材</td><td class="n">17</td><td class="n amt">268,600</td><td>田中</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261124を選ぶ"></td><td class="mono"><a href="#">J-261124</a></td><td class="n">10/18</td><td>さくら薬局</td><td>空調工事</td><td class="n">37</td><td class="n amt">584,600</td><td>渡辺</td><td><span class="bd new">＋ 受付</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261125を選ぶ"></td><td class="mono"><a href="#">J-261125</a></td><td class="n">10/28</td><td>丸山製作所</td><td>空調工事</td><td class="n">1</td><td class="n amt">256,000</td><td>田中</td><td><span class="bd pay">◷ 入金待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261126を選ぶ"></td><td class="mono"><a href="#">J-261126</a></td><td class="n">10/29</td><td>千代田システム</td><td>金型修理</td><td class="n">26</td><td class="n amt">988,000</td><td>佐藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261127を選ぶ"></td><td class="mono"><a href="#">J-261127</a></td><td class="n">10/16</td><td>千代田システム</td><td>配送委託（月額）</td><td class="n">4</td><td class="n amt">19,200</td><td>鈴木</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261128を選ぶ"></td><td class="mono"><a href="#">J-261128</a></td><td class="n">10/15</td><td>みなと食品</td><td>保守契約（年間）</td><td class="n">1</td><td class="n amt">120,000</td><td>佐藤</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261129を選ぶ"></td><td class="mono"><a href="#">J-261129</a></td><td class="n">10/19</td><td>みなと食品</td><td>金型修理</td><td class="n">7</td><td class="n amt">110,600</td><td>佐藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261130を選ぶ"></td><td class="mono"><a href="#">J-261130</a></td><td class="n">10/28</td><td>見本建設</td><td>空調工事</td><td class="n">25</td><td class="n amt">120,000</td><td>高橋</td><td><span class="bd pay">◷ 入金待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261131を選ぶ"></td><td class="mono"><a href="#">J-261131</a></td><td class="n">10/20</td><td>さくら薬局</td><td>チラシ印刷 1万部</td><td class="n">8</td><td class="n amt">9,600</td><td>田中</td><td><span class="bd warn">! 要対応</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261132を選ぶ"></td><td class="mono"><a href="#">J-261132</a></td><td class="n">10/16</td><td>ひかり印刷</td><td>業務用冷蔵庫</td><td class="n">6</td><td class="n amt">28,800</td><td>高橋</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261133を選ぶ"></td><td class="mono"><a href="#">J-261133</a></td><td class="n">10/24</td><td>中央電材</td><td>チラシ印刷 1万部</td><td class="n">1</td><td class="n amt">256,000</td><td>佐藤</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261134を選ぶ"></td><td class="mono"><a href="#">J-261134</a></td><td class="n">10/07</td><td>丸山製作所</td><td>レジ端末 3台</td><td class="n">1</td><td class="n amt">256,000</td><td>佐藤</td><td><span class="bd done">✓ 完了</span></td></tr>
+<tr><td class="ck"><input type="checkbox" aria-label="J-261135を選ぶ"></td><td class="mono"><a href="#">J-261135</a></td><td class="n">10/25</td><td>丸山製作所</td><td>業務用冷蔵庫</td><td class="n">1</td><td class="n amt">980,000</td><td>高橋</td><td><span class="bd ship">● 出荷待ち</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="foot"><span>1〜36 / 36件</span><span>選択 0件</span></div>
+  </div>
+  <p class="note">※見本です。APEX 26.1 の実機では未確認。一覧は Interactive Grid、右の詳細は Drawer のダイアログページの想定。</p>
+</main>
+<aside class="drawer" aria-label="受注の詳細">
+  <h2><span>J-261103 の詳細</span><button class="btn" type="button" aria-label="閉じる">×</button></h2>
+  <div class="body">
+    <dl>
+      <dt>顧客</dt><dd>見本不動産 株式会社</dd>
+      <dt>品目</dt><dd>保守契約（年間）</dd>
+      <dt>金額</dt><dd style="font-variant-numeric:tabular-nums;font-weight:700">¥256,000</dd>
+      <dt>受注日</dt><dd>10/27</dd>
+      <dt>担当</dt><dd>佐藤</dd>
+      <dt>状態</dt><dd><span class="bd pay">◷ 入金待ち</span></dd>
+      <dt>メモ</dt><dd>請求書は10/31に送付済み</dd>
+    </dl>
+  </div>
+  <div class="f"><button class="btn" type="button">取消</button><button class="btn save" type="button">保存</button></div>
+</aside>
+</body>
+</html>

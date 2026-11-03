@@ -1,0 +1,62 @@
+{
+  "skill": "apexlang-ui-patterns",
+  "test_cases": [
+    {
+      "name": "minimal_todo",
+      "input": "ミニマルな白と緑のTodo画面をAPEXで作りたい",
+      "assertions": [
+        "patterns/minimal.md を参照",
+        "余白と白緑の指針",
+        "主アクション1つ"
+      ]
+    },
+    {
+      "name": "dark_dashboard",
+      "input": "ダークネオンの在庫ダッシュボードを作って",
+      "assertions": [
+        "patterns/dark-neon.md を参照",
+        "暗い背景と明るいチャート"
+      ]
+    },
+    {
+      "name": "3d_city",
+      "input": "Three.jsで3Dの街並み画面をAPEXに入れたい",
+      "assertions": [
+        "patterns/3d-scene.md を参照",
+        "HTML Region + Three.js"
+      ]
+    },
+    {
+      "name": "ringi_approval",
+      "input": "経費の承認画面をAPEXで作りたい。誰の番か分かるように",
+      "assertions": [
+        "patterns/ringi-route.md を参照",
+        "主アクションは承認の1つ"
+      ]
+    },
+    {
+      "name": "ledger_orders",
+      "input": "Excelの受注台帳をAPEXの一覧と詳細に置き換えたい",
+      "assertions": [
+        "patterns/ledger-grid.md を参照",
+        "詳細はDrawer"
+      ]
+    },
+    {
+      "name": "shift_roster",
+      "input": "介護施設の週間シフト表をAPEXで作りたい",
+      "assertions": [
+        "patterns/shift-board.md を参照",
+        "人数不足の警告を色以外でも示す"
+      ]
+    },
+    {
+      "name": "mobile_field",
+      "input": "設備点検の結果を現場でスマホから入れるAPEX画面を作りたい",
+      "assertions": [
+        "patterns/mobile-field.md を参照",
+        "入力は下から出るDrawer"
+      ]
+    }
+  ]
+}
